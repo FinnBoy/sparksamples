@@ -16,7 +16,10 @@ public class Application {
 
     public static void main(String[] args) {
 
-        JavaSparkContext javaSparkContext = new JavaSparkContext(new SparkConf().setAppName("wordCount"));
+        // SparkConf sparkConf = new SparkConf().setAppName("wordCount");
+        SparkConf sparkConf = new SparkConf().setAppName("wordCount").setMaster("local");
+
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
 
         final int threshold = Integer.parseInt(args[1]);
 
