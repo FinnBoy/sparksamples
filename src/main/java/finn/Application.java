@@ -19,26 +19,27 @@ public class Application {
         // SparkConf sparkConf = new SparkConf().setAppName("wordCount");
         SparkConf sparkConf = new SparkConf().setAppName("wordCount").setMaster("local");
 
-        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
+        try (JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf)) {
 
-        final int threshold = Integer.parseInt(args[1]);
+            final int threshold = Integer.parseInt(args[1]);
 
-        JavaRDD<String> tokenized = javaSparkContext.textFile(args[0])
-                .flatMap(s -> Arrays.asList(s.split(" ")).iterator());
+            JavaRDD<String> token = javaSparkContext.textFile(args[0])
+                    .flatMap(s -> Arrays.asList(s.split(" ")).iterator());
 
-        JavaPairRDD<String, Integer> counts = tokenized
-                .mapToPair(s -> new Tuple2<>(s, 1))
-                .reduceByKey((c1, c2) -> c1 + c2);
+            JavaPairRDD<String, Integer> counts = token
+                    .mapToPair(s -> new Tuple2<>(s, 1))
+                    .reduceByKey((c1, c2) -> c1 + c2);
 
-        JavaPairRDD<String, Integer> filtered = counts.filter(t -> t._2 >= threshold);
+            JavaPairRDD<String, Integer> filtered = counts.filter(t -> t._2 >= threshold);
 
-        JavaRDD<Character> charTokenized = filtered.flatMap(t -> Chars.asList(t._1.toCharArray()).iterator());
+            JavaRDD<Character> charToken = filtered.flatMap(t -> Chars.asList(t._1.toCharArray()).iterator());
 
-        JavaPairRDD<Character, Integer> charCounts = charTokenized
-                .mapToPair(c -> new Tuple2<>(c, 1))
-                .reduceByKey((c1, c2) -> c1 + c2);
+            JavaPairRDD<Character, Integer> charCounts = charToken
+                    .mapToPair(c -> new Tuple2<>(c, 1))
+                    .reduceByKey((c1, c2) -> c1 + c2);
 
-        System.out.println(charCounts.collect());
+            System.out.println(charCounts.collect());
 
+        }
     }
 }
